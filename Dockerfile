@@ -1,3 +1,5 @@
+# Testing CI and automatic deployment for CodeAlpha Task 3
+
 FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /workspace
