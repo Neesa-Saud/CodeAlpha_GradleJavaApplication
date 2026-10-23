@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 650px;
+            margin: 60px auto;
+            padding: 20px;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        .container {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px #0001;
+        }
+
+        h1 { margin-top: 0; }
+
+        form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #2457d6;
+            color: white;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 12px;
+            background: #f4f6f9;
+            border-radius: 6px;
+        }
+
+        li span { overflow-wrap: anywhere; }
+        li.completed span {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        .complete { background: #16834a; }
+        .delete { background: #c93636; }
+        #message { color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Task Manager</h1>
+        <p>Add tasks, track your work, and mark tasks complete.</p>
+
+        <form id="taskForm">
+            <input id="taskInput" placeholder="Enter a new task" required>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <p id="message">Loading tasks...</p>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        const form = document.getElementById("taskForm");
+        const input = document.getElementById("taskInput");
+        const list = document.getElementById("taskList");
+        const message = document.getElementById("message");
+
+        async function loadTasks() {
+            try {
+                const response = await fetch("/api/tasks");
+                if (!response.ok) throw new Error("Could not load tasks");
+
+                const tasks = await response.json();
+                list.replaceChildren();
+
+                tasks.forEach(task => {
+                    const item = document.createElement("li");
+                    if (task.completed) item.classList.add("completed");
+
+                    const text = document.createElement("span");
+                    text.textContent = task.title;
+
+                    const complete = document.createElement("button");
+                    complete.textContent = task.completed ? "Completed" : "Complete";
+                    complete.className = "complete";
+                    complete.disabled = task.completed;
+                    complete.onclick = async () => {
+                        const result = await fetch(`/api/tasks/${task.id}/complete`, {
+                            method: "PATCH"
+                        });
+                        if (result.ok) loadTasks();
+                        else message.textContent = "Could not complete task.";
+                    };
+
+                    const remove = document.createElement("button");
+                    remove.textContent = "Delete";
+                    remove.className = "delete";
+                    remove.onclick = async () => {
+                        const result = await fetch(`/api/tasks/${task.id}`, {
+                            method: "DELETE"
+                        });
+                        if (result.ok) loadTasks();
+                        else message.textContent = "Could not delete task.";
+                    };
+
+                    item.append(text, complete, remove);
+                    list.appendChild(item);
+                });
+
+                message.textContent = tasks.length
+                    ? `${tasks.length} task(s)`
+                    : "No tasks yet. Add your first task!";
+            } catch (error) {
+                message.textContent = "Unable to connect to the server.";
+            }
+        }
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            const title = input.value.trim();
+            if (!title) return;
+
+            const response = await fetch("/api/tasks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title })
+            });
+
+            if (response.ok) {
+                input.value = "";
+                loadTasks();
+            } else {
+                message.textContent = "Could not add task.";
+            }
+        });
+
+        loadTasks();
+    </script>
+</body>
+</html>
