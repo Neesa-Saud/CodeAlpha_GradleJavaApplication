@@ -1,6 +1,6 @@
 # Java Application Using Gradle
 
-This project was developed as part of my **CodeAlpha Internship — Task 3**. The main purpose was to learn how Gradle can be used to build a Java application and how DevOps tools can help automate the build and deployment process.
+This project was developed as part of my **CodeAlpha Internship - Task 3**. The main purpose was to learn how Gradle can be used to build a Java application and how DevOps tools can help automate the build and deployment process.
 
 While working on this task, I used Gradle for building the application, GitHub Actions for automated builds and tests, Docker to package the application, and Render to deploy it.
 
@@ -106,7 +106,7 @@ This task helped me connect the tools I had been learning and understand how the
 ## Task Information
 
 - **Internship:** CodeAlpha
-- **Task:** Task 3 — Java Application Using Gradle
+- **Task:** Task 3 - Java Application Using Gradle
 
 ## Screenshots
 
